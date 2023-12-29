@@ -66,6 +66,12 @@ class KSparkSession(val spark: SparkSession) {
     /** Utility method to create dataframe from list. */
     inline fun <reified T> List<T>.toDF(vararg colNames: String): Dataset<Row> = toDF(spark, *colNames)
 
+    /** Utility method to create dataset from [Iterable]. */
+    inline fun <reified T> Iterable<T>.toDS(): Dataset<T> = toDS(spark)
+
+    /** Utility method to create dataframe from [Iterable]. */
+    inline fun <reified T> Iterable<T>.toDF(vararg colNames: String): Dataset<Row> = toDF(spark, *colNames)
+
     /** Utility method to create dataset from [Array]. */
     inline fun <reified T> Array<T>.toDS(): Dataset<T> = toDS(spark)
 
@@ -107,6 +113,13 @@ class KSparkSession(val spark: SparkSession) {
      * NOTE: [T] must be [Serializable].
      */
     fun <T> List<T>.toRDD(numSlices: Int = sc.defaultParallelism()): JavaRDD<T> =
+        sc.toRDD(this, numSlices)
+
+    /**
+     * Utility method to create an RDD from a [Iterable].
+     * NOTE: [T] must be [Serializable].
+     */
+    fun <T> Iterable<T>.toRDD(numSlices: Int = sc.defaultParallelism()): JavaRDD<T> =
         sc.toRDD(this, numSlices)
 
     /**

@@ -2,6 +2,7 @@ package org.jetbrains.kotlinx.spark.api
 
 import org.apache.spark.api.java.JavaRDD
 import org.apache.spark.api.java.JavaSparkContext
+import org.apache.spark.api.java.`JavaSparkContext$`
 import java.io.Serializable
 
 /**
@@ -21,6 +22,18 @@ fun <T> JavaSparkContext.toRDD(
     elements: List<T>,
     numSlices: Int = defaultParallelism(),
 ): JavaRDD<T> = parallelize(elements, numSlices)
+
+/**
+ * Utility method to create an RDD from a [Iterable].
+ * NOTE: [T] must be [Serializable].
+ */
+fun <T> JavaSparkContext.toRDD(
+    elements: Iterable<T>,
+    numSlices: Int = defaultParallelism(),
+): JavaRDD<T> {
+    val ctag = `JavaSparkContext$`.`MODULE$`.fakeClassTag<T>()
+    return JavaRDD.fromRDD(sc().parallelize(elements.toSeq() /* TODO is this efficient? */, numSlices, ctag), ctag)
+}
 
 /**
  * Returns the minimum element from this RDD as defined by the specified

@@ -42,6 +42,7 @@ import scala.Tuple2
 import scala.Tuple3
 import scala.Tuple4
 import scala.Tuple5
+import scala.collection.JavaConverters
 import kotlin.reflect.KProperty1
 
 
@@ -86,6 +87,18 @@ inline fun <reified T> List<T>.toDS(spark: SparkSession): Dataset<T> =
  * Utility method to create dataframe from list
  */
 inline fun <reified T> List<T>.toDF(spark: SparkSession, vararg colNames: String): Dataset<Row> =
+    toDS(spark).run { if (colNames.isEmpty()) toDF() else toDF(*colNames) }
+
+/**
+ * Utility method to create dataset from [Iterable]
+ */
+inline fun <reified T> Iterable<T>.toDS(spark: SparkSession): Dataset<T> =
+    spark.createDataset(toSeq() /* TODO is this efficient? */, encoder<T>())
+
+/**
+ * Utility method to create dataframe from [Iterable]
+ */
+inline fun <reified T> Iterable<T>.toDF(spark: SparkSession, vararg colNames: String): Dataset<Row> =
     toDS(spark).run { if (colNames.isEmpty()) toDF() else toDF(*colNames) }
 
 /**
